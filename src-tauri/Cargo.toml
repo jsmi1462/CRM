@@ -21,6 +21,8 @@ tauri = { version = "1.5", features = [] }
 tauri-plugin-shell = "1.2"
 sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite"] }
 tokio = { version = "1.0", features = ["full"] }
+uuid = { version = "1.0", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
 
 [features]
 default = [ "custom-protocol" ]

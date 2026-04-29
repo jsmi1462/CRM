@@ -21,6 +21,23 @@ export interface Contact {
   createdAt: string;
 }
 
+export interface Interaction {
+  id: string;
+  leadId: string;
+  contactId: string | null;
+  type: 'call' | 'email' | 'meeting' | 'note';
+  content: string | null;
+  createdAt: string;
+}
+
+export interface Metric {
+  id: string;
+  leadId: string;
+  metricType: string;
+  value: number;
+  recordedAt: string;
+}
+
 export interface Settings {
   llmApiKey: string;
   dbPath: string;
