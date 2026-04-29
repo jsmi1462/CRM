@@ -1,22 +1,22 @@
 # PubMetric CRM Development Roadmap
 
 ## Phase 1: Project Initialization & Environment Setup
-- [ ] Initialize Tauri project with React + TypeScript template
-- [ ] Configure Tailwind CSS and Shadcn/UI for the "warm, cozy" design system
-- [ ] Set up project structure (`src-tauri`, `src`, `packages`)
-- [ ] Establish linting, formatting, and pre-commit hooks
+- [x] Initialize Tauri project with React + TypeScript template
+- [x] Configure Tailwind CSS and Shadcn/UI for the "warm, cozy" design system
+- [x] Set up project structure (`src-tauri`, `src`, `packages`)
+- [x] Establish linting, formatting, and pre-commit hooks
 
 ## Phase 2: Core Architecture & State Management
-- [ ] Implement Zustand store for global state (leads, contacts, settings)
-- [ ] Set up Tauri commands for secure backend communication
-- [ ] Create configuration validation module (checks for LLM API keys, DB path, etc.)
-- [ ] Write unit tests for configuration validation and state logic
+- [x] Implement Zustand store for global state (leads, contacts, settings)
+- [x] Set up Tauri commands for secure backend communication
+- [x] Create configuration validation module (checks for LLM API keys, DB path, etc.)
+- [x] Write unit tests for configuration validation and state logic
 
 ## Phase 3: Database & Data Layer
-- [ ] Initialize SQLite database with encrypted storage
-- [ ] Define schema: `leads`, `contacts`, `interactions`, `metrics`
-- [ ] Implement Tauri commands for CRUD operations
-- [ ] Write integration tests for database operations
+- [x] Initialize SQLite database with encrypted storage
+- [x] Define schema: `leads`, `contacts`, `interactions`, `metrics`
+- [x] Implement Tauri commands for CRUD operations
+- [x] Write integration tests for database operations
 
 ## Phase 4: UI/UX Foundation & Kanban Board
 - [ ] Design cozy, uncluttered layout (sidebar, main area, metrics toggle)

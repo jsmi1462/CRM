@@ -59,10 +59,10 @@ This project is a local CRM platform designed specifically for **PubMetric**. It
 - [x] Create configuration validation module (checks for LLM API keys, DB path, etc.)
 
 ### Phase 3: Database & Data Layer
-- [ ] Initialize SQLite database with encrypted storage
-- [ ] Define schema: `leads`, `contacts`, `interactions`, `metrics`
-- [ ] Implement Tauri commands for CRUD operations
-- [ ] Write integration tests for database operations
+- [x] Initialize SQLite database with encrypted storage
+- [x] Define schema: `leads`, `contacts`, `interactions`, `metrics`
+- [x] Implement Tauri commands for CRUD operations
+- [x] Write integration tests for database operations
 
 ### Phase 4: UI/UX Foundation & Kanban Board
 - [ ] Design cozy, uncluttered layout (sidebar, main area, metrics toggle)
