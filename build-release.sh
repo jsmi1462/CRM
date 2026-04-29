@@ -35,21 +35,22 @@ VERSION=$(node -e "console.log(require('./src-tauri/tauri.conf.json').version)")
 echo "Building ${APP_NAME} v${VERSION}..."
 
 # ─── Build ─────────────────────────────────────────────────────────────────────
-export TAURI_SIGNING_PRIVATE_KEY="$(cat src-tauri/updater.key)"
-export TAURI_SIGNING_PRIVATE_KEY_PASSWORD=""
-
 npm run tauri build
 
-# ─── Locate output files ───────────────────────────────────────────────────────
+# ─── Create and sign the update bundle ────────────────────────────────────────
 BUNDLE_DIR="src-tauri/target/release/bundle/macos"
 TAR_FILE="${BUNDLE_DIR}/${APP_NAME}.app.tar.gz"
 SIG_FILE="${TAR_FILE}.sig"
 
+# Tauri sometimes creates the .tar.gz automatically; if not, create it manually.
 if [ ! -f "${TAR_FILE}" ]; then
-    echo "Error: Expected update bundle not found at: ${TAR_FILE}"
-    echo "Make sure TAURI_SIGNING_PRIVATE_KEY is set correctly — without it Tauri skips the .tar.gz."
-    exit 1
+    echo "Creating update bundle..."
+    tar czf "${TAR_FILE}" -C "${BUNDLE_DIR}" "${APP_NAME}.app"
 fi
+
+# Always re-sign to ensure the .sig matches this build.
+echo "Signing update bundle..."
+npx tauri signer sign -f "src-tauri/updater.key" -p "" "${TAR_FILE}"
 
 # ─── Detect architecture ───────────────────────────────────────────────────────
 ARCH=$(uname -m)
