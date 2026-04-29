@@ -4,6 +4,9 @@ import Sidebar from './components/Sidebar';
 import LeadsView from './components/LeadsView';
 import SetupWizard from './components/SetupWizard';
 import { MetricsView } from './components/MetricsView';
+import { check } from '@tauri-apps/plugin-updater';
+import { ask } from '@tauri-apps/plugin-dialog';
+import { relaunch } from '@tauri-apps/plugin-process';
 
 type View = 'leads' | 'settings' | 'metrics';
 
@@ -11,6 +14,33 @@ export default function App() {
   const [view, setView] = useState<View>('leads');
   const { loadLeads, config, loadConfig } = useStore();
   const [checkingConfig, setCheckingConfig] = useState(true);
+
+  // Check for updates on startup
+  useEffect(() => {
+    async function checkForUpdates() {
+      try {
+        const update = await check();
+        if (update) {
+          const yes = await ask(`Update to ${update.version} is available!\n\nRelease notes: ${update.body}\n\nWould you like to install it now?`, { 
+            title: 'PubMetric Update Available', 
+            kind: 'info',
+            okLabel: 'Update Now',
+            cancelLabel: 'Later' 
+          });
+          
+          if (yes) {
+            await update.downloadAndInstall();
+            await relaunch();
+          }
+        }
+      } catch (err) {
+        console.error('Failed to check for updates:', err);
+      }
+    }
+    
+    // Slight delay so it doesn't block initial rendering
+    setTimeout(checkForUpdates, 3000);
+  }, []);
 
   useEffect(() => {
     async function init() {

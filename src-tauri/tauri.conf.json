@@ -56,5 +56,16 @@
         "depends": []
       }
     }
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://gist.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_GIST_ID/raw/updater.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDhFQUM5MkFCQzlGQTM1NUMKUldSY05mckpxNUtzanJoUjh5dnJXVG5oNjdCLzNjaW5RMENWMjFWSC9oM0FJc2FiVlpEYTRiRDAK",
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }
