@@ -2,7 +2,7 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "PubMetric CRM",
   "identifier": "com.pubmetric.crm",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -60,7 +60,7 @@
   "plugins": {
     "updater": {
       "endpoints": [
-        "https://gist.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_GIST_ID/raw/updater.json"
+        "https://gist.githubusercontent.com/jsmi1462/291e9b8760d13312ccab20b864bbc2ac/raw/gistfile1.txt"
       ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDhFQUM5MkFCQzlGQTM1NUMKUldSY05mckpxNUtzanJoUjh5dnJXVG5oNjdCLzNjaW5RMENWMjFWSC9oM0FJc2FiVlpEYTRiRDAK",
       "windows": {
