@@ -1,5 +1,10 @@
 # PubMetric CRM Development Roadmap
 
+> **Agent assignments:**
+> - **Claude** — complex architecture, security-sensitive code, anything needing latest package/API knowledge
+> - **Gemini** — UI generation, documentation, content writing, design-oriented tasks
+> - **Aider** — mechanical code changes that follow established patterns (test files, boilerplate, repetitive edits)
+
 ## Phase 1: Project Initialization & Environment Setup
 - [x] Initialize Tauri project with React + TypeScript template
 - [x] Configure Tailwind CSS and Shadcn/UI for the "warm, cozy" design system
@@ -25,32 +30,32 @@
 - [x] Implement status-filtered card grid with search (replaced Kanban — simpler for non-technical users)
 
 ## Phase 5: Metrics & Analytics Dashboard
-- [ ] Create separate tab/window for metrics
-- [ ] Integrate Recharts/Chart.js for visualizations
-- [ ] Implement data aggregation logic (conversion rates, contact frequency, response times)
-- [ ] Ensure metrics update in real-time as leads move through the Kanban board
+- [ ] Add Metrics nav item and view skeleton — **Aider**
+- [ ] Install and wire up Recharts; create reusable `<Chart>` wrapper — **Aider**
+- [ ] Data aggregation logic: conversion rates, contact frequency, avg response time — **Claude**
+- [ ] Real-time metric updates via Zustand subscription — **Aider**
 
 ## Phase 6: LLM Integration & Automation
-- [ ] Securely store LLM API keys in Tauri's secure storage
-- [ ] Implement backend functions for drafting emails, summarizing responses, and tagging leads
-- [ ] Add UI prompts for LLM-assisted actions (e.g., "Draft follow-up", "Summarize call notes")
-- [ ] Test LLM integration with mock data and real API calls
+- [ ] Securely store API key using `tauri-plugin-store` (encrypted on disk) — **Claude**
+- [ ] Rust commands for Claude API calls: draft follow-up email, summarize notes, suggest status — **Claude**
+- [ ] "Draft follow-up" and "Summarize notes" action buttons on LeadCard — **Gemini**
+- [ ] LLM response display modal (editable before copy/send) — **Gemini**
+- [ ] Unit tests for LLM command stubs with mocked responses — **Aider**
 
 ## Phase 7: Configuration, Validation & Onboarding
-- [ ] Build a guided first-run setup wizard
-- [ ] Implement automated configuration checks (DB accessibility, API key validity, permissions)
-- [ ] Generate clear, step-by-step setup instructions for non-technical users
-- [ ] Package installer with built-in validation feedback
+- [ ] First-run detection: show setup wizard if no API key is stored — **Claude**
+- [ ] Setup wizard UI (2-step: paste API key → validate → done) — **Gemini**
+- [ ] Automated config checks on startup (key validity ping, DB accessibility) — **Aider**
+- [ ] Human-readable setup guide (`SETUP.md`) for non-technical users — **Gemini**
 
 ## Phase 8: Testing, Polish & Distribution
-- [ ] Run comprehensive unit and integration tests
-- [ ] Perform UI/UX polish (animations, transitions, cozy micro-interactions)
-- [ ] Build native installers (Windows `.exe`, macOS `.dmg`, Linux `.deb`)
-- [ ] Create distribution package with setup guide and validation script
-- [ ] Final review against "son to father" simplicity requirement
+- [ ] Expand test coverage: LeadCard interactions, modal flows, store edge cases — **Aider**
+- [ ] UI polish: loading skeletons, transition animations, micro-interactions — **Gemini**
+- [ ] Configure Tauri bundler for macOS `.dmg`, Windows `.exe`, Linux `.deb` — **Claude**
+- [ ] Write distribution `README` and drag-to-install instructions — **Gemini**
+- [ ] Final "son to father" simplicity audit and smoke test — **Claude**
 
 ## Iteration Process
-1. **Start with Phase 1**: We will implement the foundational setup first.
-2. **Review & Validate**: After each phase, we will run tests, review the UI/UX, and ensure it aligns with the "warm, clean, cozy" vision.
-3. **Iterate**: Adjust based on feedback before moving to the next phase.
-4. **Focus on Simplicity**: Every step prioritizes zero-config setup, local privacy, and intuitive doctor-to-doctor workflows.
+1. **Review & Validate**: After each phase, run tests and verify the UI feels warm and simple.
+2. **Iterate**: Adjust based on feedback before moving to the next phase.
+3. **Focus on Simplicity**: Every step prioritizes zero-config setup, local privacy, and intuitive doctor-to-doctor workflows.
