@@ -36,14 +36,14 @@
 - [x] Real-time metric updates via Zustand subscription — **Aider**
 
 ## Phase 6: LLM Integration & Automation
-- [ ] Securely store API key using `tauri-plugin-store` (encrypted on disk) — **Claude**
-- [ ] Rust commands for Claude API calls: draft follow-up email, summarize notes, suggest status — **Claude**
+- [x] Securely store API key using `tauri-plugin-store` (encrypted on disk) — **Claude**
+- [x] Rust commands for Claude API calls: draft follow-up email, summarize notes, suggest status — **Claude**
 - [x] "Draft follow-up" and "Summarize notes" action buttons on LeadCard — **Gemini**
 - [x] LLM response display modal (editable before copy/send) — **Gemini**
 - [x] Unit tests for LLM command stubs with mocked responses — **Aider**
 
 ## Phase 7: Configuration, Validation & Onboarding
-- [ ] First-run detection: show setup wizard if no API key is stored — **Claude**
+- [x] First-run detection: show setup wizard if no API key is stored — **Claude**
 - [x] Setup wizard UI (2-step: paste API key → validate → done) — **Gemini**
 - [x] Automated config checks on startup (key validity ping, DB accessibility) — **Aider**
 - [x] Human-readable setup guide (`SETUP.md`) for non-technical users — **Gemini**
@@ -51,7 +51,7 @@
 ## Phase 8: Testing, Polish & Distribution
 - [x] Expand test coverage: LeadCard interactions, modal flows, store edge cases — **Aider**
 - [x] UI polish: loading skeletons, transition animations, micro-interactions — **Gemini**
-- [ ] Configure Tauri bundler for macOS `.dmg`, Windows `.exe`, Linux `.deb` — **Claude**
+- [x] Configure Tauri bundler for macOS `.dmg`, Windows `.exe`, Linux `.deb` — **Claude**
 - [x] Write distribution `README` and drag-to-install instructions — **Gemini**
 - [ ] Final "son to father" simplicity audit and smoke test — **Claude**
 

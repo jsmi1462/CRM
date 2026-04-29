@@ -4,6 +4,8 @@ import type { Lead, LeadStatus } from '../types';
 import { STATUS_CONFIG } from '../types';
 import LeadCard from './LeadCard';
 import AddEditLeadModal from './AddEditLeadModal';
+import AIActionModal from './AIActionModal';
+import SkeletonLeadCard from './SkeletonLeadCard';
 
 type FilterTab = 'all' | LeadStatus;
 
@@ -12,6 +14,7 @@ export default function LeadsView() {
   const [filter, setFilter] = useState<FilterTab>('all');
   const [search, setSearch] = useState('');
   const [modalLead, setModalLead] = useState<Lead | null | undefined>(undefined);
+  const [aiModal, setAiModal] = useState<{ lead: Lead; action: 'draft' | 'summarize' } | null>(null);
 
   const filtered = useMemo(() => {
     let result = leads;
@@ -110,8 +113,10 @@ export default function LeadsView() {
 
       <div className="flex-1 overflow-auto p-6">
         {isLoading ? (
-          <div className="flex items-center justify-center h-48">
-            <p className="text-cozy-muted text-sm">Loading leads…</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <SkeletonLeadCard key={i} />
+            ))}
           </div>
         ) : filtered.length === 0 ? (
           <EmptyState
@@ -120,9 +125,14 @@ export default function LeadsView() {
             onAdd={() => setModalLead(null)}
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 animate-slide-up">
             {filtered.map((lead) => (
-              <LeadCard key={lead.id} lead={lead} onEdit={setModalLead} />
+              <LeadCard
+                key={lead.id}
+                lead={lead}
+                onEdit={setModalLead}
+                onAIAction={(action) => setAiModal({ lead, action })}
+              />
             ))}
           </div>
         )}
@@ -132,6 +142,14 @@ export default function LeadsView() {
         <AddEditLeadModal
           lead={modalLead}
           onClose={() => setModalLead(undefined)}
+        />
+      )}
+
+      {aiModal && (
+        <AIActionModal
+          lead={aiModal.lead}
+          action={aiModal.action}
+          onClose={() => setAiModal(null)}
         />
       )}
     </div>

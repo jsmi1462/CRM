@@ -36,3 +36,9 @@ export const STATUS_CONFIG: Record<LeadStatus, { label: string; badgeBg: string;
   converted:  { label: 'Converted',  badgeBg: 'bg-emerald-50', badgeText: 'text-emerald-700', borderColor: 'border-l-emerald-500', tabActive: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
   lost:       { label: 'Lost',       badgeBg: 'bg-gray-100',   badgeText: 'text-gray-500',    borderColor: 'border-l-gray-300',    tabActive: 'bg-gray-100 text-gray-600 border-gray-200' },
 };
+
+export interface AppConfig {
+  llmApiKey: string;
+  dbPath: string;
+  theme: string;
+}

@@ -25,6 +25,7 @@ export default function AddEditLeadModal({ lead, onClose }: AddEditLeadModalProp
 
   useEffect(() => {
     if (lead) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm({
         name: lead.name,
         email: lead.email ?? '',
@@ -64,7 +65,7 @@ export default function AddEditLeadModal({ lead, onClose }: AddEditLeadModalProp
       className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md animate-scale-in">
         <div className="flex items-center justify-between p-6 border-b border-cozy-border">
           <h2 className="text-lg font-semibold text-cozy-text">
             {isEdit ? 'Edit Lead' : 'Add New Lead'}

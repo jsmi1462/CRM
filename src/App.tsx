@@ -2,16 +2,40 @@ import { useState, useEffect } from 'react';
 import { useStore } from './stores/useStore';
 import Sidebar from './components/Sidebar';
 import LeadsView from './components/LeadsView';
+import SetupWizard from './components/SetupWizard';
 
 type View = 'leads' | 'settings';
 
 export default function App() {
   const [view, setView] = useState<View>('leads');
-  const { loadLeads } = useStore();
+  const { loadLeads, config, loadConfig } = useStore();
+  const [checkingConfig, setCheckingConfig] = useState(true);
 
   useEffect(() => {
-    loadLeads();
-  }, [loadLeads]);
+    async function init() {
+      await loadConfig();
+      setCheckingConfig(false);
+    }
+    init();
+  }, [loadConfig]);
+
+  useEffect(() => {
+    if (config?.llmApiKey) {
+      loadLeads();
+    }
+  }, [config, loadLeads]);
+
+  if (checkingConfig) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-warm-50">
+        <div className="w-8 h-8 border-4 border-warm-200 border-t-warm-600 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!config?.llmApiKey) {
+    return <SetupWizard onComplete={loadLeads} />;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden">

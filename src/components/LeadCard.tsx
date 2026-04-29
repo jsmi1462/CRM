@@ -7,9 +7,10 @@ import { useStore } from '../stores/useStore';
 interface LeadCardProps {
   lead: Lead;
   onEdit: (lead: Lead) => void;
+  onAIAction: (action: 'draft' | 'summarize') => void;
 }
 
-export default function LeadCard({ lead, onEdit }: LeadCardProps) {
+export default function LeadCard({ lead, onEdit, onAIAction }: LeadCardProps) {
   const { deleteLead, logContact } = useStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -112,23 +113,44 @@ export default function LeadCard({ lead, onEdit }: LeadCardProps) {
         )}
       </div>
 
-      <div className="px-4 pb-4 space-y-2">
-        <p className={`text-xs ${lead.lastContacted ? 'text-cozy-muted' : 'text-amber-600'}`}>
-          {lastContactedLabel}
-        </p>
+      <div className="px-4 pb-4 space-y-3">
         <div className="flex gap-2">
-          <ActionButton
-            onClick={handleEmail}
-            disabled={!lead.email}
-            icon={<EmailIcon />}
-            label="Email"
-          />
-          <ActionButton
-            onClick={handleCall}
-            disabled={!lead.phone}
-            icon={<PhoneIcon />}
-            label="Call"
-          />
+          <button
+            onClick={() => onAIAction('draft')}
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-warm-50 border border-warm-200 text-[10px] font-semibold text-warm-700 hover:bg-warm-100 hover:border-warm-300 transition-colors"
+            title="Draft follow-up email"
+          >
+            <MagicIconSmall />
+            Draft
+          </button>
+          <button
+            onClick={() => onAIAction('summarize')}
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-warm-50 border border-warm-200 text-[10px] font-semibold text-warm-700 hover:bg-warm-100 hover:border-warm-300 transition-colors"
+            title="Summarize notes"
+          >
+            <SummaryIconSmall />
+            Summarize
+          </button>
+        </div>
+
+        <div className="pt-1 space-y-2">
+          <p className={`text-[10px] ${lead.lastContacted ? 'text-cozy-muted' : 'text-amber-600 font-medium'}`}>
+            {lastContactedLabel}
+          </p>
+          <div className="flex gap-2">
+            <ActionButton
+              onClick={handleEmail}
+              disabled={!lead.email}
+              icon={<EmailIcon />}
+              label="Email"
+            />
+            <ActionButton
+              onClick={handleCall}
+              disabled={!lead.phone}
+              icon={<PhoneIcon />}
+              label="Call"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -192,6 +214,25 @@ function PhoneIcon() {
   return (
     <svg viewBox="0 0 16 16" fill="currentColor">
       <path d="M1.5 4.25c0 5.937 4.813 10.75 10.75 10.75a.75.75 0 0 0 .75-.75v-2.28a.75.75 0 0 0-.5-.714l-2.5-.834a.75.75 0 0 0-.813.202l-.84.938a9.049 9.049 0 0 1-4.91-4.91l.938-.84a.75.75 0 0 0 .202-.813l-.834-2.5A.75.75 0 0 0 3.529 1h-2.28a.75.75 0 0 0-.75.75v2.5Z" />
+    </svg>
+  );
+}
+
+function MagicIconSmall() {
+  return (
+    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m12 3 1.912 4.912L18.824 9.824 13.912 11.736 12 16.648 10.088 11.736 5.176 9.824 10.088 7.912 12 3Z" />
+    </svg>
+  );
+}
+
+function SummaryIconSmall() {
+  return (
+    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
     </svg>
   );
 }

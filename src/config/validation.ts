@@ -12,7 +12,7 @@ export function validateConfig(config: { llmApiKey: string; dbPath: string }): C
 
   if (!config.dbPath || config.dbPath.trim() === '') {
     errors.push('Database path is required.');
-  } else if (!/^[a-zA-Z0-9\/\-_\.]+$/.test(config.dbPath)) {
+  } else if (!/^[a-zA-Z0-9/_. -]+$/.test(config.dbPath)) {
     errors.push('Database path contains invalid characters.');
   }
 

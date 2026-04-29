@@ -1,6 +1,6 @@
 import { useStore } from '../stores/useStore';
 
-type View = 'leads' | 'settings';
+export type View = 'leads' | 'metrics' | 'settings';
 
 interface SidebarProps {
   currentView: View;
@@ -31,6 +31,12 @@ export default function Sidebar({ currentView, onNavigate }: SidebarProps) {
           icon={<LeadsIcon />}
           label="Leads"
           badge={leads.length > 0 ? leads.length : undefined}
+        />
+        <NavItem
+          active={currentView === 'metrics'}
+          onClick={() => onNavigate('metrics')}
+          icon={<MetricsIcon />}
+          label="Metrics"
         />
         <NavItem
           active={currentView === 'settings'}
@@ -80,6 +86,14 @@ function LeadsIcon() {
   return (
     <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
       <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.255 1.139.872 1.139h9.47Z" />
+    </svg>
+  );
+}
+
+function MetricsIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+      <path d="M1 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3Zm5-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V2Z" />
     </svg>
   );
 }
