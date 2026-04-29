@@ -49,7 +49,8 @@ This project is a local CRM platform designed specifically for **PubMetric**. It
 - [x] Initialize Tauri project with React + TypeScript template (`package.json` created)
 - [x] Configure Tailwind CSS and Shadcn/UI for the "warm, cozy" design system
 - [x] Set up project structure (`src-tauri`, `src`, `packages`)
-- [ ] Establish linting, formatting, and pre-commit hooks
+- [x] Establish linting, formatting, and pre-commit hooks
+- [x] Configure Vitest for unit testing
 
 ### Phase 2: Core Architecture & State Management
 - [ ] Implement Zustand store for global state (leads, contacts, settings)
