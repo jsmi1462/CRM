@@ -53,10 +53,10 @@ This project is a local CRM platform designed specifically for **PubMetric**. It
 - [x] Configure Vitest for unit testing
 
 ### Phase 2: Core Architecture & State Management
-- [ ] Implement Zustand store for global state (leads, contacts, settings)
+- [x] Implement Zustand store for global state (leads, contacts, settings)
+- [x] Write unit tests for state logic
 - [ ] Set up Tauri commands for secure backend communication
 - [ ] Create configuration validation module (checks for LLM API keys, DB path, etc.)
-- [ ] Write unit tests for configuration validation and state logic
 
 ### Phase 3: Database & Data Layer
 - [ ] Initialize SQLite database with encrypted storage
