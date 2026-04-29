@@ -104,7 +104,9 @@ export const useStore = create<AppState>((set, get) => ({
   loadConfig: async () => {
     const hasKey = await invoke<boolean>('has_api_key');
     if (hasKey) {
-      set({ config: { llmProvider: 'unknown', llmApiKey: '********', dbPath: 'pubmetric.db', theme: 'light' } });
+      // Get the actual provider from the store
+      const provider = await invoke<string>('get_llm_provider');
+      set({ config: { llmProvider: provider, llmApiKey: '********', dbPath: 'pubmetric.db', theme: 'light' } });
     }
   },
 

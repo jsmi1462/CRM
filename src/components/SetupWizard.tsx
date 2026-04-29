@@ -9,7 +9,7 @@ interface SetupWizardProps {
 export default function SetupWizard({ onComplete }: SetupWizardProps) {
   const { saveConfig } = useStore();
   const [step, setStep] = useState(1);
-  const [provider, setProvider] = useState<'anthropic' | 'gemini' | 'lmstudio'>('anthropic');
+  const [provider, setProvider] = useState<'anthropic' | 'gemini' | 'openai' | 'lmstudio'>('anthropic');
   const [apiKey, setApiKey] = useState('');
   const [validating, setValidating] = useState(false);
   const [error, setError] = useState('');
@@ -85,8 +85,8 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
               </div>
 
               <div className="space-y-4">
-                <div className="flex flex-wrap gap-4 justify-center">
-                  <label className="flex items-center gap-2 text-sm font-medium text-cozy-text cursor-pointer">
+                <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center">
+                  <label className="flex items-center gap-1.5 text-xs font-medium text-cozy-text cursor-pointer">
                     <input
                       type="radio"
                       checked={provider === 'anthropic'}
@@ -95,7 +95,16 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                     />
                     Claude
                   </label>
-                  <label className="flex items-center gap-2 text-sm font-medium text-cozy-text cursor-pointer">
+                  <label className="flex items-center gap-1.5 text-xs font-medium text-cozy-text cursor-pointer">
+                    <input
+                      type="radio"
+                      checked={provider === 'openai'}
+                      onChange={() => setProvider('openai')}
+                      className="text-warm-600 focus:ring-warm-400"
+                    />
+                    OpenAI
+                  </label>
+                  <label className="flex items-center gap-1.5 text-xs font-medium text-cozy-text cursor-pointer">
                     <input
                       type="radio"
                       checked={provider === 'gemini'}
@@ -104,7 +113,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                     />
                     Gemini
                   </label>
-                  <label className="flex items-center gap-2 text-sm font-medium text-cozy-text cursor-pointer">
+                  <label className="flex items-center gap-1.5 text-xs font-medium text-cozy-text cursor-pointer">
                     <input
                       type="radio"
                       checked={provider === 'lmstudio'}
@@ -115,81 +124,79 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                       }}
                       className="text-warm-600 focus:ring-warm-400"
                     />
-                    Local (LM Studio)
+                    LM Studio
                   </label>
                 </div>
 
                 {provider === 'lmstudio' ? (
                   <div className="space-y-4">
-                    <div className="bg-warm-50 p-4 rounded-xl border border-warm-200 text-left text-sm space-y-2.5 shadow-inner">
-                      <p><strong>1.</strong> Download and install <a href="https://lmstudio.ai" target="_blank" rel="noreferrer" className="text-warm-600 hover:underline">LM Studio</a>.</p>
-                      <p><strong>2.</strong> Open LM Studio and search for <strong>Llama-3.2-3B-Instruct</strong> (ideal for 8GB RAM systems).</p>
-                      <p><strong>3.</strong> Download the <strong>Q4_K_M</strong> GGUF version of the model.</p>
-                      <p><strong>4.</strong> Go to the <strong>Local Server</strong> tab (the <code>↔️</code> icon).</p>
-                      <p><strong>5.</strong> Load the model at the top, then click <strong>Start Server</strong>.</p>
+                    <div className="bg-warm-50 p-4 rounded-xl border border-warm-200 text-left text-[11px] space-y-2 shadow-inner leading-relaxed">
+                      <p><strong>1.</strong> Install <a href="https://lmstudio.ai" target="_blank" rel="noreferrer" className="text-warm-600 hover:underline">LM Studio</a>.</p>
+                      <p><strong>2.</strong> Download <strong>Llama-3.2-3B-Instruct</strong> (ideal for 8GB RAM).</p>
+                      <p><strong>3.</strong> Go to the <strong>Local Server</strong> (<code>↔️</code> icon).</p>
+                      <p><strong>4.</strong> Load the model and click <strong>Start Server</strong>.</p>
                     </div>
                     
                     {testStatus !== 'idle' && (
-                      <div className={`text-sm p-3 rounded-lg ${testStatus === 'success' ? 'bg-green-50 text-green-700' : testStatus === 'error' ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-700'}`}>
-                        {testStatus === 'testing' ? 'Testing connection to localhost:1234...' : testMessage}
+                      <div className={`text-xs p-2.5 rounded-lg ${testStatus === 'success' ? 'bg-green-50 text-green-700' : testStatus === 'error' ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-700'}`}>
+                        {testStatus === 'testing' ? 'Connecting to localhost:1234...' : testMessage}
                       </div>
                     )}
 
                     <button
                       onClick={handleTestLocal}
                       disabled={testStatus === 'testing'}
-                      className="w-full py-2.5 rounded-xl border border-warm-600 text-warm-600 font-medium hover:bg-warm-50 transition-colors disabled:opacity-50"
+                      className="w-full py-2 rounded-xl border border-warm-600 text-warm-600 text-sm font-medium hover:bg-warm-50 transition-colors disabled:opacity-50"
                     >
                       Test Connection
                     </button>
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-cozy-text">
-                      {provider === 'anthropic' ? 'Anthropic API Key' : 'Google AI Studio API Key'}
+                    <label className="text-xs font-medium text-cozy-text">
+                      {provider === 'anthropic' ? 'Anthropic API Key' : provider === 'openai' ? 'OpenAI API Key' : 'Google AI Studio API Key'}
                     </label>
                     <input
                       type="password"
                       value={apiKey}
                       onChange={(e) => setApiKey(e.target.value)}
-                      placeholder={provider === 'anthropic' ? 'sk-ant-api03-...' : 'AIzaSy...'}
-                      className="w-full px-4 py-3 rounded-xl border border-cozy-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent font-mono"
+                      placeholder={provider === 'anthropic' ? 'sk-ant-api03-...' : provider === 'openai' ? 'sk-proj-...' : 'AIzaSy...'}
+                      className="w-full px-4 py-2.5 rounded-xl border border-cozy-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent font-mono"
                       autoFocus
                     />
                     {error && <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
-                    <p className="text-[11px] text-cozy-muted italic">
-                      Your key is stored locally on your device and never shared.
-                    </p>
                   </div>
                 )}
               </div>
 
-              <button
-                onClick={handleNext}
-                disabled={validating}
-                className="w-full bg-warm-600 hover:bg-warm-700 text-white font-medium py-3 rounded-xl transition-all shadow-lg shadow-warm-200 disabled:opacity-50"
-              >
-                {validating ? 'Saving...' : (provider === 'lmstudio' ? 'Save & Continue' : 'Connect & Continue')}
-              </button>
-
-              <div className="text-center space-y-3">
-                {provider !== 'lmstudio' && (
-                  <a
-                    href={provider === 'anthropic' ? 'https://console.anthropic.com/' : 'https://aistudio.google.com/app/apikey'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block text-xs text-warm-600 hover:underline font-medium"
-                  >
-                    Don't have an API key? Get one here.
-                  </a>
-                )}
-                
+              <div className="space-y-3">
                 <button
-                  onClick={handleSkip}
-                  className="text-xs text-cozy-muted hover:text-cozy-text transition-colors underline"
+                  onClick={handleNext}
+                  disabled={validating}
+                  className="w-full bg-warm-600 hover:bg-warm-700 text-white font-medium py-3 rounded-xl transition-all shadow-lg shadow-warm-200 disabled:opacity-50"
                 >
-                  Skip for now (Proceed without AI features)
+                  {validating ? 'Saving...' : (provider === 'lmstudio' ? 'Save & Continue' : 'Connect & Continue')}
                 </button>
+
+                <div className="text-center space-y-3">
+                  {provider !== 'lmstudio' && (
+                    <a
+                      href={provider === 'anthropic' ? 'https://console.anthropic.com/' : provider === 'openai' ? 'https://platform.openai.com/api-keys' : 'https://aistudio.google.com/app/apikey'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-[10px] text-warm-600 hover:underline font-medium uppercase tracking-wider"
+                    >
+                      Get {provider.toUpperCase()} API Key
+                    </a>
+                  )}
+                  
+                  <button
+                    onClick={handleSkip}
+                    className="text-[10px] text-cozy-muted hover:text-cozy-text transition-colors underline uppercase tracking-wider font-semibold"
+                  >
+                    Skip (Disable AI features)
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
@@ -200,7 +207,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
               <div className="space-y-2">
                 <h2 className="text-lg font-semibold text-cozy-text">All Set!</h2>
                 <p className="text-sm text-cozy-muted">
-                  Your CRM is ready to use. We've initialized your local database and connected to Claude.
+                  Your CRM is ready to use. We've initialized your local database and connected to AI.
                 </p>
               </div>
 

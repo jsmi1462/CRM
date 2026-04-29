@@ -70,11 +70,18 @@ async fn validate_config(config: AppConfig) -> Result<(), String> {
 #[tauri::command]
 async fn has_api_key(app: tauri::AppHandle) -> bool {
     let store = app.store(STORE_FILE).unwrap();
-    let provider = store.get(KEY_LLM_PROVIDER).and_then(|v| v.as_str());
-    if provider == Some("none") {
+    
+    let is_none = store.get(KEY_LLM_PROVIDER)
+        .and_then(|v| v.as_str().map(|s| s == "none"))
+        .unwrap_or(false);
+        
+    if is_none {
         return true;
     }
-    store.get(KEY_API_KEY).and_then(|v| v.as_str()).map(|s| !s.is_empty()).unwrap_or(false)
+    
+    store.get(KEY_API_KEY)
+        .and_then(|v| v.as_str().map(|s| !s.is_empty()))
+        .unwrap_or(false)
 }
 
 #[tauri::command]
@@ -83,6 +90,14 @@ async fn set_api_key(app: tauri::AppHandle, provider: String, key: String) -> Re
     store.set(KEY_LLM_PROVIDER, serde_json::json!(provider));
     store.set(KEY_API_KEY, serde_json::json!(key));
     store.save().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn get_llm_provider(app: tauri::AppHandle) -> String {
+    let store = app.store(STORE_FILE).unwrap();
+    store.get(KEY_LLM_PROVIDER)
+        .and_then(|v| v.as_str().map(|s| s.to_string()))
+        .unwrap_or_else(|| "anthropic".to_string())
 }
 
 #[tauri::command]
@@ -271,6 +286,7 @@ pub fn run() {
             validate_config,
             has_api_key,
             set_api_key,
+            get_llm_provider,
             test_lmstudio_connection,
             get_leads,
             create_lead,

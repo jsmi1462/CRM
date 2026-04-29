@@ -106,9 +106,55 @@ pub async fn call(provider: &str, api_key: &str, system: &str, user_msg: &str) -
         call_gemini(api_key, system, user_msg).await
     } else if provider == "lmstudio" {
         call_lmstudio(system, user_msg).await
+    } else if provider == "openai" {
+        call_openai(api_key, system, user_msg).await
     } else {
         call_anthropic(api_key, system, user_msg).await
     }
+}
+
+async fn call_openai(api_key: &str, system: &str, user_msg: &str) -> Result<String, String> {
+    let client = Client::new();
+    let url = "https://api.openai.com/v1/chat/completions";
+
+    let body = OpenAiRequest {
+        model: "gpt-4o-mini".to_string(),
+        messages: vec![
+            OpenAiMessage { role: "system".to_string(), content: system.to_string() },
+            OpenAiMessage { role: "user".to_string(), content: user_msg.to_string() },
+        ],
+        temperature: 0.7,
+        max_tokens: 1024,
+    };
+
+    let resp = client
+        .post(url)
+        .header("Authorization", format!("Bearer {}", api_key))
+        .json(&body)
+        .send()
+        .await
+        .map_err(|e| format!("Network error: {}", e))?;
+
+    if !resp.status().is_success() {
+        let status = resp.status().as_u16();
+        let text = resp.text().await.unwrap_or_default();
+        return Err(match status {
+            401 => "Invalid API key. Please check your key in Settings.".to_string(),
+            429 => "Rate limit reached or quota exceeded.".to_string(),
+            _ => format!("OpenAI API error {}: {}", status, text),
+        });
+    }
+
+    let data: OpenAiResponse = resp
+        .json()
+        .await
+        .map_err(|e| format!("Failed to parse OpenAI response: {}", e))?;
+
+    data.choices
+        .into_iter()
+        .next()
+        .map(|c| c.message.content)
+        .ok_or_else(|| "Empty response from OpenAI".to_string())
 }
 
 async fn call_lmstudio(system: &str, user_msg: &str) -> Result<String, String> {
