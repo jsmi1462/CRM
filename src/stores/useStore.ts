@@ -15,7 +15,7 @@ interface AppState {
   generateFollowUp: (id: string) => Promise<string>;
   summarizeNotes: (id: string) => Promise<string>;
   loadConfig: () => Promise<void>;
-  saveConfig: (apiKey: string) => Promise<void>;
+  saveConfig: (provider: string, apiKey: string) => Promise<void>;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -104,12 +104,12 @@ export const useStore = create<AppState>((set, get) => ({
   loadConfig: async () => {
     const hasKey = await invoke<boolean>('has_api_key');
     if (hasKey) {
-      set({ config: { llmApiKey: '********', dbPath: 'pubmetric.db', theme: 'light' } });
+      set({ config: { llmProvider: 'unknown', llmApiKey: '********', dbPath: 'pubmetric.db', theme: 'light' } });
     }
   },
 
-  saveConfig: async (apiKey) => {
-    await invoke('set_api_key', { key: apiKey });
-    set({ config: { llmApiKey: '********', dbPath: 'pubmetric.db', theme: 'light' } });
+  saveConfig: async (provider, apiKey) => {
+    await invoke('set_api_key', { provider, key: apiKey });
+    set({ config: { llmProvider: provider, llmApiKey: apiKey ? '********' : '', dbPath: 'pubmetric.db', theme: 'light' } });
   },
 }));

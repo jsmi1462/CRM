@@ -38,6 +38,7 @@ export const STATUS_CONFIG: Record<LeadStatus, { label: string; badgeBg: string;
 };
 
 export interface AppConfig {
+  llmProvider: string;
   llmApiKey: string;
   dbPath: string;
   theme: string;

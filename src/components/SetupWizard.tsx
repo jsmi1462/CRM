@@ -8,6 +8,7 @@ interface SetupWizardProps {
 export default function SetupWizard({ onComplete }: SetupWizardProps) {
   const { saveConfig } = useStore();
   const [step, setStep] = useState(1);
+  const [provider, setProvider] = useState<'anthropic' | 'gemini'>('anthropic');
   const [apiKey, setApiKey] = useState('');
   const [validating, setValidating] = useState(false);
   const [error, setError] = useState('');
@@ -20,13 +21,21 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
     setValidating(true);
     setError('');
     try {
-      // In a real app, we'd validate the key with the provider here or via backend
-      await saveConfig(apiKey);
+      await saveConfig(provider, apiKey);
       setStep(2);
     } catch (err) {
       setError(String(err));
     } finally {
       setValidating(false);
+    }
+  };
+
+  const handleSkip = async () => {
+    try {
+      await saveConfig('none', '');
+      onComplete();
+    } catch (err) {
+      setError(String(err));
     }
   };
 
@@ -50,27 +59,52 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
           {step === 1 ? (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="space-y-2 text-center">
-                <h2 className="text-lg font-semibold text-cozy-text">Connect to Claude</h2>
+                <h2 className="text-lg font-semibold text-cozy-text">Connect to AI</h2>
                 <p className="text-sm text-cozy-muted">
-                  PubMetric uses Claude to help you draft emails and summarize notes.
-                  Paste your Anthropic API key below.
+                  PubMetric uses AI to help you draft emails and summarize notes.
+                  Choose your provider and paste your API key below.
                 </p>
               </div>
 
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-cozy-text">Anthropic API Key</label>
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="sk-ant-api03-..."
-                  className="w-full px-4 py-3 rounded-xl border border-cozy-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent font-mono"
-                  autoFocus
-                />
-                {error && <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
-                <p className="text-[11px] text-cozy-muted italic">
-                  Your key is stored locally on your device and never shared.
-                </p>
+              <div className="space-y-4">
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 text-sm font-medium text-cozy-text cursor-pointer">
+                    <input
+                      type="radio"
+                      checked={provider === 'anthropic'}
+                      onChange={() => setProvider('anthropic')}
+                      className="text-warm-600 focus:ring-warm-400"
+                    />
+                    Claude (Anthropic)
+                  </label>
+                  <label className="flex items-center gap-2 text-sm font-medium text-cozy-text cursor-pointer">
+                    <input
+                      type="radio"
+                      checked={provider === 'gemini'}
+                      onChange={() => setProvider('gemini')}
+                      className="text-warm-600 focus:ring-warm-400"
+                    />
+                    Gemini (Google)
+                  </label>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-cozy-text">
+                    {provider === 'anthropic' ? 'Anthropic API Key' : 'Google AI Studio API Key'}
+                  </label>
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder={provider === 'anthropic' ? 'sk-ant-api03-...' : 'AIzaSy...'}
+                    className="w-full px-4 py-3 rounded-xl border border-cozy-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent font-mono"
+                    autoFocus
+                  />
+                  {error && <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
+                  <p className="text-[11px] text-cozy-muted italic">
+                    Your key is stored locally on your device and never shared.
+                  </p>
+                </div>
               </div>
 
               <button
@@ -81,16 +115,23 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                 {validating ? 'Validating...' : 'Connect & Continue'}
               </button>
 
-              <p className="text-center">
+              <div className="text-center space-y-3">
                 <a
-                  href="https://console.anthropic.com/"
+                  href={provider === 'anthropic' ? 'https://console.anthropic.com/' : 'https://aistudio.google.com/app/apikey'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-warm-600 hover:underline font-medium"
+                  className="block text-xs text-warm-600 hover:underline font-medium"
                 >
                   Don't have an API key? Get one here.
                 </a>
-              </p>
+                
+                <button
+                  onClick={handleSkip}
+                  className="text-xs text-cozy-muted hover:text-cozy-text transition-colors underline"
+                >
+                  Skip for now (Proceed without AI features)
+                </button>
+              </div>
             </div>
           ) : (
             <div className="space-y-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">

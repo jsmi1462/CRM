@@ -15,6 +15,7 @@ use uuid::Uuid;
 
 const STORE_FILE: &str = "app_settings.json";
 const KEY_API_KEY: &str = "api_key";
+const KEY_LLM_PROVIDER: &str = "llm_provider";
 
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -36,15 +37,27 @@ struct AppState {
 
 // ── Key/value store helpers ───────────────────────────────────────────────────
 
-fn get_stored_api_key(app: &tauri::AppHandle) -> Result<String, String> {
+fn get_llm_config(app: &tauri::AppHandle) -> Result<(String, String), String> {
     let store = app.store(STORE_FILE).map_err(|e| e.to_string())?;
-    store
+    
+    let provider = store
+        .get(KEY_LLM_PROVIDER)
+        .and_then(|v| v.as_str().map(|s| s.to_string()))
+        .unwrap_or_else(|| "anthropic".to_string());
+
+    if provider == "none" {
+        return Err("AI features are disabled. Update your Settings to enable them.".to_string());
+    }
+
+    let api_key = store
         .get(KEY_API_KEY)
         .and_then(|v| v.as_str().map(|s| s.to_string()))
         .filter(|s| !s.is_empty())
         .ok_or_else(|| {
-            "API key not configured. Please add your Anthropic API key in Settings.".to_string()
-        })
+            "API key not configured. Please add your API key in Settings.".to_string()
+        })?;
+
+    Ok((provider, api_key))
 }
 
 // ── Config commands ───────────────────────────────────────────────────────────
@@ -56,12 +69,18 @@ async fn validate_config(config: AppConfig) -> Result<(), String> {
 
 #[tauri::command]
 async fn has_api_key(app: tauri::AppHandle) -> bool {
-    get_stored_api_key(&app).is_ok()
+    let store = app.store(STORE_FILE).unwrap();
+    let provider = store.get(KEY_LLM_PROVIDER).and_then(|v| v.as_str());
+    if provider == Some("none") {
+        return true;
+    }
+    store.get(KEY_API_KEY).and_then(|v| v.as_str()).map(|s| !s.is_empty()).unwrap_or(false)
 }
 
 #[tauri::command]
-async fn set_api_key(app: tauri::AppHandle, key: String) -> Result<(), String> {
+async fn set_api_key(app: tauri::AppHandle, provider: String, key: String) -> Result<(), String> {
     let store = app.store(STORE_FILE).map_err(|e| e.to_string())?;
+    store.set(KEY_LLM_PROVIDER, serde_json::json!(provider));
     store.set(KEY_API_KEY, serde_json::json!(key));
     store.save().map_err(|e| e.to_string())
 }
@@ -174,7 +193,7 @@ async fn draft_followup_email(
     notes: Option<String>,
     last_contacted: Option<String>,
 ) -> Result<String, String> {
-    let api_key = get_stored_api_key(&app)?;
+    let (provider, api_key) = get_llm_config(&app)?;
     let system = "You are a professional assistant helping a medical device sales representative \
         draft concise, warm follow-up emails for doctor-to-doctor outreach. \
         Write in a friendly but professional tone. Keep it under 150 words. \
@@ -185,7 +204,7 @@ async fn draft_followup_email(
         notes.as_deref().unwrap_or("none"),
         last_contacted.as_deref().unwrap_or("never"),
     );
-    llm::call(&api_key, system, &user_msg).await
+    llm::call(&provider, &api_key, system, &user_msg).await
 }
 
 #[tauri::command]
@@ -193,10 +212,10 @@ async fn summarize_notes(
     app: tauri::AppHandle,
     notes: String,
 ) -> Result<String, String> {
-    let api_key = get_stored_api_key(&app)?;
+    let (provider, api_key) = get_llm_config(&app)?;
     let system = "Summarize the following CRM notes into 2–3 concise bullet points. \
         Focus on the most actionable information. Use plain language.";
-    llm::call(&api_key, system, &notes).await
+    llm::call(&provider, &api_key, system, &notes).await
 }
 
 #[tauri::command]
@@ -205,12 +224,12 @@ async fn suggest_status(
     notes: String,
     current_status: String,
 ) -> Result<String, String> {
-    let api_key = get_stored_api_key(&app)?;
+    let (provider, api_key) = get_llm_config(&app)?;
     let system = "Based on CRM notes about a medical professional lead, suggest the most \
         appropriate status. Reply with exactly one word from this list: \
         new, contacted, interested, converted, lost.";
     let user_msg = format!("Current status: {}\nNotes: {}", current_status, notes);
-    llm::call(&api_key, system, &user_msg).await
+    llm::call(&provider, &api_key, system, &user_msg).await
 }
 
 // ── App entry point ───────────────────────────────────────────────────────────

@@ -3,8 +3,9 @@ import { useStore } from './stores/useStore';
 import Sidebar from './components/Sidebar';
 import LeadsView from './components/LeadsView';
 import SetupWizard from './components/SetupWizard';
+import { MetricsView } from './components/MetricsView';
 
-type View = 'leads' | 'settings';
+type View = 'leads' | 'settings' | 'metrics';
 
 export default function App() {
   const [view, setView] = useState<View>('leads');
@@ -20,7 +21,7 @@ export default function App() {
   }, [loadConfig]);
 
   useEffect(() => {
-    if (config?.llmApiKey) {
+    if (config) {
       loadLeads();
     }
   }, [config, loadLeads]);
@@ -33,7 +34,7 @@ export default function App() {
     );
   }
 
-  if (!config?.llmApiKey) {
+  if (!config) {
     return <SetupWizard onComplete={loadLeads} />;
   }
 
@@ -42,6 +43,7 @@ export default function App() {
       <Sidebar currentView={view} onNavigate={setView} />
       <main className="flex-1 overflow-hidden">
         {view === 'leads' && <LeadsView />}
+        {view === 'metrics' && <MetricsView />}
         {view === 'settings' && <SettingsView />}
       </main>
     </div>
