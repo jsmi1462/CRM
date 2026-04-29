@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '../stores/useStore';
+import { invoke } from '@tauri-apps/api/core';
 
 interface SetupWizardProps {
   onComplete: () => void;
@@ -8,20 +9,23 @@ interface SetupWizardProps {
 export default function SetupWizard({ onComplete }: SetupWizardProps) {
   const { saveConfig } = useStore();
   const [step, setStep] = useState(1);
-  const [provider, setProvider] = useState<'anthropic' | 'gemini'>('anthropic');
+  const [provider, setProvider] = useState<'anthropic' | 'gemini' | 'lmstudio'>('anthropic');
   const [apiKey, setApiKey] = useState('');
   const [validating, setValidating] = useState(false);
   const [error, setError] = useState('');
+  
+  const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+  const [testMessage, setTestMessage] = useState('');
 
   const handleNext = async () => {
-    if (!apiKey.trim()) {
+    if (provider !== 'lmstudio' && !apiKey.trim()) {
       setError('Please enter an API key.');
       return;
     }
     setValidating(true);
     setError('');
     try {
-      await saveConfig(provider, apiKey);
+      await saveConfig(provider, provider === 'lmstudio' ? 'local' : apiKey);
       setStep(2);
     } catch (err) {
       setError(String(err));
@@ -36,6 +40,20 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
       onComplete();
     } catch (err) {
       setError(String(err));
+    }
+  };
+
+  const handleTestLocal = async () => {
+    setTestStatus('testing');
+    try {
+      const success = await invoke<boolean>('test_lmstudio_connection');
+      if (success) {
+        setTestStatus('success');
+        setTestMessage('Connection successful!');
+      }
+    } catch (err) {
+      setTestStatus('error');
+      setTestMessage(String(err));
     }
   };
 
@@ -62,12 +80,12 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                 <h2 className="text-lg font-semibold text-cozy-text">Connect to AI</h2>
                 <p className="text-sm text-cozy-muted">
                   PubMetric uses AI to help you draft emails and summarize notes.
-                  Choose your provider and paste your API key below.
+                  Choose your provider below.
                 </p>
               </div>
 
               <div className="space-y-4">
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-4 justify-center">
                   <label className="flex items-center gap-2 text-sm font-medium text-cozy-text cursor-pointer">
                     <input
                       type="radio"
@@ -75,7 +93,7 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                       onChange={() => setProvider('anthropic')}
                       className="text-warm-600 focus:ring-warm-400"
                     />
-                    Claude (Anthropic)
+                    Claude
                   </label>
                   <label className="flex items-center gap-2 text-sm font-medium text-cozy-text cursor-pointer">
                     <input
@@ -84,27 +102,66 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                       onChange={() => setProvider('gemini')}
                       className="text-warm-600 focus:ring-warm-400"
                     />
-                    Gemini (Google)
+                    Gemini
+                  </label>
+                  <label className="flex items-center gap-2 text-sm font-medium text-cozy-text cursor-pointer">
+                    <input
+                      type="radio"
+                      checked={provider === 'lmstudio'}
+                      onChange={() => {
+                        setProvider('lmstudio');
+                        setTestStatus('idle');
+                        setError('');
+                      }}
+                      className="text-warm-600 focus:ring-warm-400"
+                    />
+                    Local (LM Studio)
                   </label>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-cozy-text">
-                    {provider === 'anthropic' ? 'Anthropic API Key' : 'Google AI Studio API Key'}
-                  </label>
-                  <input
-                    type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder={provider === 'anthropic' ? 'sk-ant-api03-...' : 'AIzaSy...'}
-                    className="w-full px-4 py-3 rounded-xl border border-cozy-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent font-mono"
-                    autoFocus
-                  />
-                  {error && <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
-                  <p className="text-[11px] text-cozy-muted italic">
-                    Your key is stored locally on your device and never shared.
-                  </p>
-                </div>
+                {provider === 'lmstudio' ? (
+                  <div className="space-y-4">
+                    <div className="bg-warm-50 p-4 rounded-xl border border-warm-200 text-left text-sm space-y-2.5 shadow-inner">
+                      <p><strong>1.</strong> Download and install <a href="https://lmstudio.ai" target="_blank" rel="noreferrer" className="text-warm-600 hover:underline">LM Studio</a>.</p>
+                      <p><strong>2.</strong> Open LM Studio and search for <strong>Llama-3.2-3B-Instruct</strong> (ideal for 8GB RAM systems).</p>
+                      <p><strong>3.</strong> Download the <strong>Q4_K_M</strong> GGUF version of the model.</p>
+                      <p><strong>4.</strong> Go to the <strong>Local Server</strong> tab (the <code>↔️</code> icon).</p>
+                      <p><strong>5.</strong> Load the model at the top, then click <strong>Start Server</strong>.</p>
+                    </div>
+                    
+                    {testStatus !== 'idle' && (
+                      <div className={`text-sm p-3 rounded-lg ${testStatus === 'success' ? 'bg-green-50 text-green-700' : testStatus === 'error' ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-700'}`}>
+                        {testStatus === 'testing' ? 'Testing connection to localhost:1234...' : testMessage}
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleTestLocal}
+                      disabled={testStatus === 'testing'}
+                      className="w-full py-2.5 rounded-xl border border-warm-600 text-warm-600 font-medium hover:bg-warm-50 transition-colors disabled:opacity-50"
+                    >
+                      Test Connection
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-cozy-text">
+                      {provider === 'anthropic' ? 'Anthropic API Key' : 'Google AI Studio API Key'}
+                    </label>
+                    <input
+                      type="password"
+                      value={apiKey}
+                      onChange={(e) => setApiKey(e.target.value)}
+                      placeholder={provider === 'anthropic' ? 'sk-ant-api03-...' : 'AIzaSy...'}
+                      className="w-full px-4 py-3 rounded-xl border border-cozy-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent font-mono"
+                      autoFocus
+                    />
+                    {error && <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
+                    <p className="text-[11px] text-cozy-muted italic">
+                      Your key is stored locally on your device and never shared.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <button
@@ -112,18 +169,20 @@ export default function SetupWizard({ onComplete }: SetupWizardProps) {
                 disabled={validating}
                 className="w-full bg-warm-600 hover:bg-warm-700 text-white font-medium py-3 rounded-xl transition-all shadow-lg shadow-warm-200 disabled:opacity-50"
               >
-                {validating ? 'Validating...' : 'Connect & Continue'}
+                {validating ? 'Saving...' : (provider === 'lmstudio' ? 'Save & Continue' : 'Connect & Continue')}
               </button>
 
               <div className="text-center space-y-3">
-                <a
-                  href={provider === 'anthropic' ? 'https://console.anthropic.com/' : 'https://aistudio.google.com/app/apikey'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-xs text-warm-600 hover:underline font-medium"
-                >
-                  Don't have an API key? Get one here.
-                </a>
+                {provider !== 'lmstudio' && (
+                  <a
+                    href={provider === 'anthropic' ? 'https://console.anthropic.com/' : 'https://aistudio.google.com/app/apikey'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-xs text-warm-600 hover:underline font-medium"
+                  >
+                    Don't have an API key? Get one here.
+                  </a>
+                )}
                 
                 <button
                   onClick={handleSkip}

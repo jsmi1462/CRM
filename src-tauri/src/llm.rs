@@ -72,12 +72,82 @@ struct GeminiError {
     message: String,
 }
 
+#[derive(Serialize)]
+struct OpenAiRequest {
+    model: String,
+    messages: Vec<OpenAiMessage>,
+    temperature: f32,
+    max_tokens: u32,
+}
+
+#[derive(Serialize)]
+struct OpenAiMessage {
+    role: String,
+    content: String,
+}
+
+#[derive(Deserialize)]
+struct OpenAiResponse {
+    choices: Vec<OpenAiChoice>,
+}
+
+#[derive(Deserialize)]
+struct OpenAiChoice {
+    message: OpenAiMessageResponse,
+}
+
+#[derive(Deserialize)]
+struct OpenAiMessageResponse {
+    content: String,
+}
+
 pub async fn call(provider: &str, api_key: &str, system: &str, user_msg: &str) -> Result<String, String> {
     if provider == "gemini" {
         call_gemini(api_key, system, user_msg).await
+    } else if provider == "lmstudio" {
+        call_lmstudio(system, user_msg).await
     } else {
         call_anthropic(api_key, system, user_msg).await
     }
+}
+
+async fn call_lmstudio(system: &str, user_msg: &str) -> Result<String, String> {
+    let client = Client::new();
+    let url = "http://127.0.0.1:1234/v1/chat/completions";
+
+    let body = OpenAiRequest {
+        model: "local-model".to_string(), // LM Studio routes to currently loaded model
+        messages: vec![
+            OpenAiMessage { role: "system".to_string(), content: system.to_string() },
+            OpenAiMessage { role: "user".to_string(), content: user_msg.to_string() },
+        ],
+        temperature: 0.7,
+        max_tokens: 1024,
+    };
+
+    let resp = client
+        .post(url)
+        .json(&body)
+        .send()
+        .await
+        .map_err(|e| format!("Could not connect to LM Studio. Is the server running? ({})", e))?;
+
+    if !resp.status().is_success() {
+        let status = resp.status().as_u16();
+        let text = resp.text().await.unwrap_or_default();
+        return Err(format!("LM Studio API error {}: {}", status, text));
+    }
+
+    let data: OpenAiResponse = resp
+        .json()
+        .await
+        .map_err(|e| format!("Failed to parse LM Studio response: {}", e))?;
+
+    data.choices
+        .into_iter()
+        .next()
+        .map(|c| c.message.content)
+        .ok_or_else(|| "Empty response from LM Studio".to_string())
 }
 
 async fn call_anthropic(api_key: &str, system: &str, user_msg: &str) -> Result<String, String> {

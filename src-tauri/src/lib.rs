@@ -85,6 +85,17 @@ async fn set_api_key(app: tauri::AppHandle, provider: String, key: String) -> Re
     store.save().map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+async fn test_lmstudio_connection() -> Result<bool, String> {
+    let client = reqwest::Client::new();
+    let resp = client.get("http://127.0.0.1:1234/v1/models").send().await;
+    match resp {
+        Ok(r) if r.status().is_success() => Ok(true),
+        Ok(r) => Err(format!("Server reachable but returned error: {}", r.status())),
+        Err(e) => Err(format!("Could not connect. Is LM Studio running? ({})", e)),
+    }
+}
+
 // ── Lead CRUD commands ────────────────────────────────────────────────────────
 
 #[tauri::command]
@@ -260,6 +271,7 @@ pub fn run() {
             validate_config,
             has_api_key,
             set_api_key,
+            test_lmstudio_connection,
             get_leads,
             create_lead,
             update_lead,
