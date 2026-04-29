@@ -157,12 +157,45 @@ async fn call_openai(api_key: &str, system: &str, user_msg: &str) -> Result<Stri
         .ok_or_else(|| "Empty response from OpenAI".to_string())
 }
 
+#[derive(Deserialize)]
+struct LmStudioModelsResponse {
+    data: Vec<LmStudioModelInfo>,
+}
+
+#[derive(Deserialize)]
+struct LmStudioModelInfo {
+    id: String,
+}
+
 async fn call_lmstudio(system: &str, user_msg: &str) -> Result<String, String> {
     let client = Client::new();
+    
+    // First, fetch the dynamically loaded model ID from LM Studio
+    let models_url = "http://127.0.0.1:1234/v1/models";
+    let models_resp = client
+        .get(models_url)
+        .send()
+        .await
+        .map_err(|e| format!("Could not connect to LM Studio. Is the server running? ({})", e))?;
+
+    if !models_resp.status().is_success() {
+        return Err(format!("Failed to fetch models from LM Studio: {}", models_resp.status()));
+    }
+
+    let models_data: LmStudioModelsResponse = models_resp
+        .json()
+        .await
+        .map_err(|e| format!("Failed to parse LM Studio models: {}", e))?;
+
+    let model_id = models_data.data.into_iter().next().map(|m| m.id).ok_or_else(|| {
+        "No models are currently loaded in LM Studio. Please open the Local Server tab and load a model first.".to_string()
+    })?;
+
+    // Now make the actual chat completion request with the exact model ID
     let url = "http://127.0.0.1:1234/v1/chat/completions";
 
     let body = OpenAiRequest {
-        model: "local-model".to_string(), // LM Studio routes to currently loaded model
+        model: model_id,
         messages: vec![
             OpenAiMessage { role: "system".to_string(), content: system.to_string() },
             OpenAiMessage { role: "user".to_string(), content: user_msg.to_string() },
@@ -176,7 +209,7 @@ async fn call_lmstudio(system: &str, user_msg: &str) -> Result<String, String> {
         .json(&body)
         .send()
         .await
-        .map_err(|e| format!("Could not connect to LM Studio. Is the server running? ({})", e))?;
+        .map_err(|e| format!("Could not connect to LM Studio. ({})", e))?;
 
     if !resp.status().is_success() {
         let status = resp.status().as_u16();
