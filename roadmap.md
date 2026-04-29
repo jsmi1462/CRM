@@ -18,11 +18,11 @@
 - [x] Implement Tauri commands for CRUD operations
 - [x] Write integration tests for database operations
 
-## Phase 4: UI/UX Foundation & Kanban Board
-- [ ] Design cozy, uncluttered layout (sidebar, main area, metrics toggle)
-- [ ] Implement drag-and-drop Kanban board using `dnd-kit`
-- [ ] Build lead cards with essential fields (name, email, phone, last contacted, status)
-- [ ] Add seamless outreach buttons (email, SMS, call placeholders)
+## Phase 4: UI/UX Foundation
+- [x] Design cozy, uncluttered layout (sidebar, main area, status tabs)
+- [x] Build lead cards with essential fields (name, email, phone, last contacted, status)
+- [x] Add seamless outreach buttons (email, call via shell plugin with auto log-contact)
+- [x] Implement status-filtered card grid with search (replaced Kanban — simpler for non-technical users)
 
 ## Phase 5: Metrics & Analytics Dashboard
 - [ ] Create separate tab/window for metrics

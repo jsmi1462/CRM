@@ -1,38 +1,39 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: 45 33% 97%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 24 9.8% 40%;
-    --primary-foreground: 60 9.1% 97.8%;
-    --secondary: 60 4.8% 95.9%;
-    --secondary-foreground: 24 9.8% 40%;
-    --muted: 60 4.8% 95.9%;
-    --muted-foreground: 25 5.3% 44.7%;
-    --accent: 60 4.8% 95.9%;
-    --accent-foreground: 24 9.8% 40%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 24 9.8% 40%;
-    --radius: 0.75rem;
-  }
+@theme {
+  --color-warm-50: #fdfbf7;
+  --color-warm-100: #f9f5ed;
+  --color-warm-200: #f2e8d5;
+  --color-warm-300: #e9d5b6;
+  --color-warm-400: #dfb88a;
+  --color-warm-500: #d49a63;
+  --color-warm-600: #c47d48;
+  --color-warm-700: #a35f38;
+  --color-warm-800: #834a31;
+  --color-warm-900: #6a3b2a;
+
+  --color-cozy-bg: #faf9f6;
+  --color-cozy-card: #ffffff;
+  --color-cozy-text: #333333;
+  --color-cozy-muted: #6b7280;
+  --color-cozy-border: #e5e7eb;
+
+  --shadow-cozy: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-cozy-hover: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
   body {
-    @apply bg-warm-50 text-cozy-text antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply bg-cozy-bg text-cozy-text antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  }
+}
+
+@layer components {
+  .input {
+    @apply w-full px-3 py-2 text-sm rounded-xl border border-cozy-border bg-white text-cozy-text
+           placeholder:text-cozy-muted
+           focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent
+           transition-colors;
   }
 }

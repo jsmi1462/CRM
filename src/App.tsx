@@ -1,54 +1,44 @@
-import { useState } from 'react'
-import { invoke } from '@tauri-apps/api/core'
+import { useState, useEffect } from 'react';
+import { useStore } from './stores/useStore';
+import Sidebar from './components/Sidebar';
+import LeadsView from './components/LeadsView';
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState('')
-  const [name, setName] = useState('')
+type View = 'leads' | 'settings';
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke('greet', { name }))
-  }
+export default function App() {
+  const [view, setView] = useState<View>('leads');
+  const { loadLeads } = useStore();
+
+  useEffect(() => {
+    loadLeads();
+  }, [loadLeads]);
 
   return (
-    <div className="min-h-screen bg-warm-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-cozy-card rounded-2xl shadow-cozy p-8 space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-cozy-text">Welcome to PubMetric</h1>
-          <p className="text-cozy-muted">Your cozy, local CRM for managing leads.</p>
-        </div>
-        
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium text-cozy-text">
-              Your Name
-            </label>
-            <input
-              id="name"
-              placeholder="Enter your name"
-              className="flex h-10 w-full rounded-xl border border-cozy-border bg-white px-3 py-2 text-sm placeholder:text-cozy-muted focus:outline-none focus:ring-2 focus:ring-warm-400 focus:border-transparent"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          
-          <button
-            className="w-full bg-warm-600 hover:bg-warm-700 text-white font-medium py-2.5 px-4 rounded-xl transition-colors duration-200"
-            onClick={greet}
-            disabled={!name.trim()}
-          >
-            Greet
-          </button>
-        </div>
-
-        {greetMsg && (
-          <p className="text-center text-cozy-muted">
-            {greetMsg}
-          </p>
-        )}
-      </div>
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar currentView={view} onNavigate={setView} />
+      <main className="flex-1 overflow-hidden">
+        {view === 'leads' && <LeadsView />}
+        {view === 'settings' && <SettingsView />}
+      </main>
     </div>
-  )
+  );
 }
 
-export default App
+function SettingsView() {
+  return (
+    <div className="p-8 max-w-lg">
+      <h1 className="text-xl font-semibold text-cozy-text mb-6">Settings</h1>
+      <div className="bg-white rounded-xl border border-cozy-border p-6 space-y-4">
+        <div>
+          <p className="text-sm font-medium text-cozy-text mb-1">About</p>
+          <p className="text-sm text-cozy-muted">PubMetric CRM — your private, local lead tracker.</p>
+          <p className="text-xs text-cozy-muted mt-1">All data is stored on your computer. Nothing is shared online.</p>
+        </div>
+        <div className="border-t border-cozy-border pt-4">
+          <p className="text-sm font-medium text-cozy-text mb-1">Version</p>
+          <p className="text-sm text-cozy-muted">0.1.0</p>
+        </div>
+      </div>
+    </div>
+  );
+}
